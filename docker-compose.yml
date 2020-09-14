@@ -1,0 +1,33 @@
+version: '3'
+services:
+  api-gateway:
+    build: './api-gateway'
+    depends_on:
+      - users-service
+    environment:
+      - USERS_SERVICE_URI=http://users-service:7101
+      - SCENES_SERVICE_URI=http://scenes-service:7102
+    ports:
+      - "7000:7000"
+    volumes:
+      - ./api-gateway:/opt/app
+
+
+  users-service:
+    build: './users-service'
+    ports:
+      - "7101:7101"
+    volumes:
+      - ./users-service:/opt/app
+
+
+  scenes-service:
+    build: './scenes-service'
+    depends_on:
+      - users-service
+    environment:
+      - USERS_SERVICE_URI=http://users-service:7101
+    ports:
+      - "7102:7102"
+    volumes:
+      - ./scenes-service:/opt/app
