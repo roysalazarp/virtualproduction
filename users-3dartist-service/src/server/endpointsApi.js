@@ -4,97 +4,70 @@ const bcrypt = require('bcryptjs');
 const User3dartist = require('../models/user3dartist');
 
 const endpointsApi = app => {
-  
   app.get('/', async (req, res, next) => {
-    // FETCH_USER_BY_ID
-    const FETCH_USER_BY_ID = await req.query.FETCH_USER_BY_ID;
-    const userId_fetchUser3dartistById = await req.query.id;
-    if (FETCH_USER_BY_ID && userId_fetchUser3dartistById) {
-      const obtainedUser3dartist = await User3dartist.findById(userId_fetchUser3dartistById);
-      obtainedUser3dartist.password = null
-      return res.send(obtainedUser3dartist);
+    let request = await req.query.CASE
+    switch (request) {
+      case 'login':
+          const email_login = await req.query.email;
+          const password_login = await req.query.password;
+          if (email_login || password_login) {
+            const user = await User3dartist.findOne({ email: email_login});
+            if (!user) {
+              return next(new Error('User3dartist does not exist!'))
+            }
+            const comparePassword = await bcrypt.compare(password_login, user.password);
+            if (!comparePassword ) {
+              throw new Error('Incorrect password!')
+            }
+            const { accessToken3Dartist, refreshToken3Dartist } = createTokens(user);
+
+            return res.send({ userId3Dartist: user.id, accessToken3Dartist: accessToken3Dartist, refreshToken3Dartist: refreshToken3Dartist, tokenExpiration3Dartist: 1 });
+          }
+          break;
+      case 'me':
+          const userId_me = await req.query.id;
+          const obtainedUser3dartist_me = await User3dartist.findById({_id: userId_me});
+          res.send({ ...obtainedUser3dartist_me._doc, password: null });
+          break;
+      case 'invalidate tokens':
+          const userId_invalidateTokens = await req.query.id;
+          const user_invalidateTokens = await User3dartist.findById({_id: userId_invalidateTokens});
+          if (!user_invalidateTokens) {
+            return false;
+          }
+          user_invalidateTokens.count += 1;
+          await user_invalidateTokens.save();
+          res.send(true);
+          break;
+      case 'refresh token':
+          const userId_refreshToken = await req.query.id;
+          const count = await req.query.count;
+          const user_refreshToken = await User3dartist.findById({_id: userId_refreshToken});
+          if (!user_refreshToken || user_refreshToken.count !== parseInt(count)) {
+            return next();
+          }
+          const tokens = createTokens(user_refreshToken);
+          res.send(tokens);
+          break;
+      case 'fetch all users':
+          const obtainedUser3dartist_fetchAllUsers = await User3dartist.find();
+          res.send(obtainedUser3dartist_fetchAllUsers.map(user => {
+            return {
+              ...user._doc,
+              password: null
+            }
+          }))
+          break;
+      case 'fetch user by id':
+          const userId_fetchUser3dartistById = await req.query.id;
+          const obtainedUser3dartist = await User3dartist.findById(userId_fetchUser3dartistById);
+          obtainedUser3dartist.password = null
+          res.send(obtainedUser3dartist);
+          break;    
+  
+      default:
+          break;
     }
-    //_________________________________________________//
-
-
-
-    // FETCH_ALL_USERS
-    const FETCH_ALL_USERS = await req.query.FETCH_ALL_USERS;
-    if (FETCH_ALL_USERS) {
-      const obtainedUser3dartist = await User3dartist.find();
-      return res.send(obtainedUser3dartist.map(user => {
-        return {
-          ...user._doc,
-          password: null
-        }
-      }))
-    }
-    //_________________________________________________//
-
-
-
-    // REFRESH_TOKEN
-    const userId_refreshToken = await req.query.id;
-    const count = await req.query.count;
-    const REFRESH_TOKEN = await req.query.REFRESH_TOKEN;
-    if (REFRESH_TOKEN && userId_refreshToken) {
-      const user = await User3dartist.findById({_id: userId_refreshToken});
-      if (!user || user.count !== parseInt(count)) {
-        return next();
-      }
-      const tokens = createTokens(user);
-      return res.send(tokens);
-    }
-    //_________________________________________________//
-    
-
-
-    // INVALIDATE_TOKENS
-    const userId_invalidateTokens = await req.query.id;
-    const INVALIDATE_TOKENS = await req.query.INVALIDATE_TOKENS;
-    if (INVALIDATE_TOKENS && userId_invalidateTokens) {
-      const user = await User3dartist.findById({_id: userId_invalidateTokens});
-      if (!user) {
-        return false;
-      }
-      user.count += 1;
-      await user.save();
-      return res.send(true);
-    }
-    //_________________________________________________//
-
-
-
-    // ME
-    const userId_me = await req.query.id;
-    const ME = await req.query.ME;
-    if (ME && userId_me) {
-      const obtainedUser3dartist = await User3dartist.findById({_id: userId_me});
-      return res.send({ ...obtainedUser3dartist._doc, password: null });
-    }
-    //_________________________________________________//
-
-
-
-    // LOGIN
-    const LOGIN = await req.query.LOGIN;
-    const email_login = await req.query.email;
-    const password_login = await req.query.password;
-
-    if (LOGIN && (email_login || password_login)) {
-      const user = await User3dartist.findOne({ email: email_login});
-      if (!user) {
-        return next(new Error('User3dartist does not exist!'))
-      }
-      const comparePassword = await bcrypt.compare(password_login, user.password);
-      if (!comparePassword ) {
-        throw new Error('Incorrect password!')
-      }
-      const { accessToken3Dartist, refreshToken3Dartist } = createTokens(user);
-
-      return res.send({ userId3Dartist: user.id, accessToken3Dartist: accessToken3Dartist, refreshToken3Dartist: refreshToken3Dartist, tokenExpiration3Dartist: 1 });
-    }
-    //_________________________________________________//
   });
   
   app.post('/', async (req, res, next) => {

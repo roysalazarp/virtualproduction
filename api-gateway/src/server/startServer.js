@@ -52,7 +52,7 @@ app.use(async (req, res, next) => {
       method: 'get',
       url: USERS_FILMMAKER_SERVICE_URI,
       params: {
-        REFRESH_TOKEN: true,
+        CASE: 'refresh token',
         id: dataFilmmaker.userIdFilmmaker,
         count: dataFilmmaker.count
       }
@@ -94,14 +94,13 @@ app.use(async (req, res, next) => {
       method: 'get',
       url: USERS_3DARTIST_SERVICE_URI,
       params: {
-        REFRESH_TOKEN: true,
+        CASE: 'refresh token',
         id: data3Dartist.userId3Dartist,
         count: data3Dartist.count
       }
     }).then(result => {
       return result.data
     })
-    console.log(user3Dartist);
     res.cookie("refresh-token-3Dartist", user3Dartist.refreshToken3Dartist);
     res.cookie("access-token-3Dartist", user3Dartist.accessToken3Dartist);
     req.userId3Dartist = user3Dartist.id;

@@ -9,19 +9,16 @@ const BOOKINGS_SERVICE_URI = process.env.BOOKINGS_SERVICE_URI;
 
 
 const user = async userId => {
-
   try {
     const user = await axios({
       method: 'get',
       url: USERS_3DARTIST_SERVICE_URI,
       params: {
-        FETCH_USER_BY_ID: true,
+        CASE: 'fetch user by id',
         id: userId,
       }
     });
-
     let userData = user.data;
-
     return {
       _id: userData._id,
       count: userData.count,
@@ -34,20 +31,18 @@ const user = async userId => {
   }
 }
 
-const userFilmmaker = async userId => {
 
+const userFilmmaker = async userId => {
   try {
     const user = await axios({
       method: 'get',
       url: USERS_FILMMAKER_SERVICE_URI,
       params: {
-        FETCH_USER_BY_ID: true,
+        CASE: 'fetch user by id',
         id: userId,
       }
     });
-
     let userData = user.data;
-
     return {
       _id: userData._id,
       count: userData.count,
@@ -60,8 +55,8 @@ const userFilmmaker = async userId => {
   }
 }
 
-const singleScenes = async sceneId => {
 
+const singleScenes = async sceneId => {
   if(sceneId.length < 1 || sceneId == undefined){
     console.log('empty')
     return 
@@ -75,9 +70,7 @@ const singleScenes = async sceneId => {
           id: sceneId
         }
       })
-
       const result = scene.data;
-
       return {
         _id: result._id,
         name: result.name,
@@ -90,8 +83,8 @@ const singleScenes = async sceneId => {
   }
 }
 
-const scenes = async sceneIds => {
 
+const scenes = async sceneIds => {
   if(sceneIds.length < 1 || sceneIds == undefined){
     console.log('empty')
     return 
@@ -105,7 +98,6 @@ const scenes = async sceneIds => {
           ids: sceneIds
         }
       })
-  
       const a = scenes.data.map(async scene => {
         const bb = await scene.map(async result => {
           const sceneObject =  {
@@ -127,10 +119,10 @@ const scenes = async sceneIds => {
   }
 }
 
-const bookings = async bookingIds => {
 
+const bookings = async bookingIds => {
   if(bookingIds.length < 1 || bookingIds == undefined){
-    console.log('empty')
+    console.log('empty bookings')
     return 
   } else {
     try {
@@ -142,7 +134,6 @@ const bookings = async bookingIds => {
           ids: bookingIds
         }
       })
-  
       const a = bookings.data.map(async booking => {
         const bb = await booking.map(async result => {
           const bookingObject =  {
@@ -165,6 +156,7 @@ const bookings = async bookingIds => {
   }
 }
 
+
 const updateUserBookedScenes = async (userFilmmakerId) => {
   const bookings = await axios({
     method: 'get',
@@ -177,12 +169,11 @@ const updateUserBookedScenes = async (userFilmmakerId) => {
   const arrayBookings = bookings.data.map(booking => {
     return booking._id;
   })
-
   const updateBookedScenes = await axios({
     method: 'put',
     url: USERS_FILMMAKER_SERVICE_URI,
     data: {
-      UPDATE_BOOKED_SCENES: true,
+      CASE: 'update booked scenes',
       id: userFilmmakerId,
       idArray: arrayBookings
     }
@@ -225,14 +216,13 @@ const resolvers = {
         method: 'get',
         url: USERS_3DARTIST_SERVICE_URI,
         params: {
+          CASE: 'me',
           id: req.userId3Dartist,
-          ME: true,
         }
       })
       return user.data;
     },
     meFilmmaker: async (_, __, { req }) => {
-
       if (!req.userIdFilmmaker) {
         console.log('Please Login')
         return null;
@@ -241,8 +231,8 @@ const resolvers = {
         method: 'get',
         url: USERS_FILMMAKER_SERVICE_URI,
         params: {
+          CASE: 'me',
           id: req.userIdFilmmaker,
-          ME: true,
         }
       })
       return user.data;
@@ -251,18 +241,15 @@ const resolvers = {
       if (!req.userId3Dartist) {
         throw new Error('Unauthenticated');
       }
-
       try {
         const users = await axios({
           method: 'get',
           url: USERS_3DARTIST_SERVICE_URI,
           params: {
-            FETCH_ALL_USERS: true
+            CASE: 'fetch all users'
           }
         })
-
         updateUserCreatedScenes(req.userId);
-
         const data = users.data.map(async result => {
           let userObject = {
             _id: result._id,
@@ -271,10 +258,8 @@ const resolvers = {
             email: result.email,
             password: result.password
           }
-
           return userObject;
         })
-
         const results = await Promise.all(data);
         return results;
       } catch (err) {
@@ -282,21 +267,18 @@ const resolvers = {
         throw err;
       }
     },
-
     usersFilmmaker: async (_, __, { req }) => {
       if (!req.userIdFilmmaker) {
         throw new Error('Unauthenticated');
       }
-
       try {
         const users = await axios({
           method: 'get',
           url: USERS_FILMMAKER_SERVICE_URI,
           params: {
-            FETCH_ALL_USERS: true
+            CASE: 'fetch all users'
           }
         })
-
         const data = users.data.map(async result => {
           let userObject = {
             _id: result._id,
@@ -305,10 +287,8 @@ const resolvers = {
             email: result.email,
             password: result.password
           }
-
           return userObject;
         })
-
         const results = await Promise.all(data);
         return results;
       } catch (err) {
@@ -316,7 +296,6 @@ const resolvers = {
         throw err;
       }
     },
-
     scenes: async (_, __, { req }) => {
       try {
         const scenes = await axios({
@@ -326,7 +305,6 @@ const resolvers = {
             FETCH_ALL_SCENES: true
           }
         })
-  
         const data = await scenes.data.map(async result => {
           let sceneObject = {
             _id: result._id,
@@ -343,7 +321,6 @@ const resolvers = {
         throw err;
       }
     },
-
     bookings: async (_, __, { req }) => {
       try {
         const bookings = await axios({
@@ -353,7 +330,6 @@ const resolvers = {
             FETCH_ALL_BOOKINGS: true
           }
         });
-  
         const data = await bookings.data.map(async result => {
           const scene = await axios({
             method: 'get',
@@ -363,7 +339,6 @@ const resolvers = {
               id: result.scene
             }
           });
-
           if (Object.keys(scene.data).length === 0) {
             console.log(`scene with ID:${result.scene} from bookingID: ${result._id} is missing`)
             return {
@@ -374,7 +349,6 @@ const resolvers = {
               updatedAt: new Date(result.updatedAt).toISOString(),
             }
           }
-
           let sceneObject = {
             _id: result._id,
             scene: singleScenes.bind(this, result.scene),
@@ -391,23 +365,20 @@ const resolvers = {
         throw err;
       }
     },
-
     login3Dartist: async (_, { email, password }, {res}) => {
       const users = await axios({
         method: 'get',
         url: USERS_3DARTIST_SERVICE_URI,
         params: {
-          LOGIN: true,
+          CASE: 'login',
           email: email,
           password: password
         }
       }).then(result => {
         const refreshToken3Dartist = result.data.refreshToken3Dartist
         const accessToken3Dartist = result.data.accessToken3Dartist
-        
         res.cookie("refresh-token-3Dartist", refreshToken3Dartist);
         res.cookie("access-token-3Dartist", accessToken3Dartist);
-
         return result.data
       });
       return users;
@@ -417,33 +388,28 @@ const resolvers = {
         method: 'get',
         url: USERS_FILMMAKER_SERVICE_URI,
         params: {
-          LOGIN: true,
+          CASE: 'login',
           email: email,
           password: password
         }
       }).then(result => {
         const refreshTokenFilmmaker = result.data.refreshTokenFilmmaker
         const accessTokenFilmmaker = result.data.accessTokenFilmmaker
-        
         res.cookie("refresh-token-Filmmaker", refreshTokenFilmmaker);
         res.cookie("access-token-Filmmaker", accessTokenFilmmaker);
-
         return result.data
       });
       return users;
     }
   },
-
   Mutation: {
     createUser3dartist: async (_, { email, password }) => {
       if (!email || !password) {
         return new Error("Invalid body!");
       }
-      
       const passwordHashed = await bcrypt.hash(password, 12)
         .then(result => { return result })
         .catch(err => { throw err })
-
       const user = await axios({
         method: 'post',
         url: USERS_3DARTIST_SERVICE_URI,
@@ -459,16 +425,14 @@ const resolvers = {
       if (!email || !password) {
         return new Error("Invalid body!");
       }
-      
       const passwordHashed = await bcrypt.hash(password, 12)
         .then(result => { return result })
         .catch(err => { throw err })
-
       const user = await axios({
         method: 'post',
         url: USERS_FILMMAKER_SERVICE_URI,
         data: {
-          CREATE_USER: true,
+          CASE: 'create user',
           email: email,
           passwordHashed: passwordHashed
         }
@@ -476,11 +440,9 @@ const resolvers = {
       return user.data;
     },
     createScene: async (_, { name, description }, {req}) => {
-
       if (!req.userId3Dartist) {
         throw new Error('Unauthenticated');
       }
-      
       try {
         const scene = await axios({
           method: 'post',
@@ -492,11 +454,8 @@ const resolvers = {
             creator: req.userId3Dartist
           }
         })
-
         updateUserCreatedScenes(req.userId3Dartist);
-
         let result = scene.data;
-        
         return {
           _id: result._id,
           name: result.name,
@@ -508,7 +467,6 @@ const resolvers = {
         throw err;
       }
     },
-
     bookScene: async (_, { sceneId }, {req}) => {
       if (!req.userIdFilmmaker) {
         throw new Error('Unauthenticated with filmmaker account');
@@ -522,7 +480,6 @@ const resolvers = {
             id: sceneId
           }
         });
-
         const checkBooking = await axios({
           method: 'get',
           url: BOOKINGS_SERVICE_URI,
@@ -531,15 +488,11 @@ const resolvers = {
             id: sceneId
           }
         });
-
         const sceneBooked = checkBooking.data.scene;
-
         console.log(sceneBooked)
-        
         if (sceneBooked) {
           throw new Error('you already booked this scene');
         }
-
         const booking = await axios({
           method: 'post',
           url: BOOKINGS_SERVICE_URI,
@@ -549,11 +502,8 @@ const resolvers = {
             scene: scene.data,
           }
         });
-        
         updateUserBookedScenes(req.userIdFilmmaker);
-
         let result = booking.data;
-        
         return {
           _id: result._id,
           user: userFilmmaker.bind(this, result.user),
@@ -566,12 +516,10 @@ const resolvers = {
         throw err;
       }
     },
-
     cancelBooking: async (_, { bookingId }, {req}) => {
       if (!req.userIdFilmmaker) {
         throw new Error('Unauthenticated with filmmaker account');
       }
-      
       try {
         const booking = await axios({
           method: 'get',
@@ -581,11 +529,9 @@ const resolvers = {
             id: bookingId
           }
         });
-
         if (Object.keys(booking.data).length === 0) {
           throw new Error('No such booking');
         }
-
         const deleteBookingItem = await axios({
           method: 'delete',
           url: BOOKINGS_SERVICE_URI,
@@ -595,11 +541,8 @@ const resolvers = {
             bookingId: bookingId,
           }
         });
-
         updateUserBookedScenes(req.userIdFilmmaker);
-
         const sceneId = booking.data.scene;
-
         const scene = await axios({
           method: 'get',
           url: SCENES_SERVICE_URI,
@@ -608,9 +551,7 @@ const resolvers = {
             id: sceneId
           }
         });
-
         const result = scene.data;
-
         return {
           _id: result._id,
           name: result.name,
@@ -622,47 +563,40 @@ const resolvers = {
         throw err;
       }
     },
-
     invalidateTokens3Dartist: async (_, __, { req, res }) => {
       if (!req.userId3Dartist) {
         return false;
       }
-
       const user = await axios({
         method: 'get',
         url: USERS_3DARTIST_SERVICE_URI,
         params: {
+          CASE: 'invalidate tokens',
           id: req.userId3Dartist,
-          INVALIDATE_TOKENS: true,
         }
       }).then(result => {
         return result.data
       })
-
       res.clearCookie('access-token-3Dartist')
       res.clearCookie('refresh-token-3Dartist')
-
       return user;
     },
     invalidateTokensFilmmaker: async (_, __, { req, res }) => {
       if (!req.userIdFilmmaker) {
         return false;
       }
-  
       const user = await axios({
         method: 'get',
         url: USERS_FILMMAKER_SERVICE_URI,
         params: {
+          CASE: 'invalidate tokens',
           id: req.userIdFilmmaker,
-          INVALIDATE_TOKENS: true,
         }
       }).then(result => {
         return result.data
       })
-  
       res.clearCookie('access-token-Filmmaker')
       res.clearCookie('refresh-token-Filmmaker')
-  
       return user;
     }
   },
