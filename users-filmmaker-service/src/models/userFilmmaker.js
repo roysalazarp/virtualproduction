@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const Schema = mongoose.Schema;
 
-const userSchema = new Schema({
+const userFilmmakerSchema = new Schema({
   email: {
     type: String,
     required: true
@@ -15,12 +15,12 @@ const userSchema = new Schema({
     type: Number,
     default: 0
   },
-  createdScenes: [
+  bookedScenes: [
     {
       type: Schema.Types.ObjectId,
-      ref: 'Scene'
+      ref: 'Booking'
     }
   ]
 });
 
-module.exports = mongoose.model('User', userSchema);
+module.exports = mongoose.model('UserFilmmaker', userFilmmakerSchema);

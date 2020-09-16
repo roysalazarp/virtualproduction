@@ -1,7 +1,7 @@
 import bodyParser from "body-parser";
 import cors from "cors";
 import express from "express";
-import ScenesServiceDBconnection from "src/db/connection";
+import UsersServiceDBconnection from "src/db/connection";
 
 import endpointsApi from "src/server/endpointsApi";
 
@@ -25,10 +25,10 @@ app.use(
 
 endpointsApi(app);
 
-ScenesServiceDBconnection.then(
+UsersServiceDBconnection.then(
   () => {
-    app.listen(7102, () => {
-      console.log('scenes service working')
+    app.listen(7103, () => {
+      console.log('users service working')
     });
   }
 );

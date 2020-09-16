@@ -1,22 +1,18 @@
 import "dotenv/config";
 import { createTokens } from "./auth";
 const bcrypt = require('bcryptjs');
-const User = require('../models/user');
-
-const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET;
-const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET;
-
+const User3dartist = require('../models/user3dartist');
 
 const endpointsApi = app => {
   
   app.get('/', async (req, res, next) => {
     // FETCH_USER_BY_ID
     const FETCH_USER_BY_ID = await req.query.FETCH_USER_BY_ID;
-    const userId_fetchUserById = await req.query.id;
-    if (FETCH_USER_BY_ID && userId_fetchUserById) {
-      const obtainedUser = await User.findById(userId_fetchUserById);
-      obtainedUser.password = null
-      return res.send(obtainedUser);
+    const userId_fetchUser3dartistById = await req.query.id;
+    if (FETCH_USER_BY_ID && userId_fetchUser3dartistById) {
+      const obtainedUser3dartist = await User3dartist.findById(userId_fetchUser3dartistById);
+      obtainedUser3dartist.password = null
+      return res.send(obtainedUser3dartist);
     }
     //_________________________________________________//
 
@@ -25,8 +21,8 @@ const endpointsApi = app => {
     // FETCH_ALL_USERS
     const FETCH_ALL_USERS = await req.query.FETCH_ALL_USERS;
     if (FETCH_ALL_USERS) {
-      const obtainedUser = await User.find();
-      return res.send(obtainedUser.map(user => {
+      const obtainedUser3dartist = await User3dartist.find();
+      return res.send(obtainedUser3dartist.map(user => {
         return {
           ...user._doc,
           password: null
@@ -39,10 +35,10 @@ const endpointsApi = app => {
 
     // REFRESH_TOKEN
     const userId_refreshToken = await req.query.id;
-    const REFRESH_TOKEN = await req.query.REFRESH_TOKEN;
     const count = await req.query.count;
+    const REFRESH_TOKEN = await req.query.REFRESH_TOKEN;
     if (REFRESH_TOKEN && userId_refreshToken) {
-      const user = await User.findById({_id: userId_refreshToken});
+      const user = await User3dartist.findById({_id: userId_refreshToken});
       if (!user || user.count !== parseInt(count)) {
         return next();
       }
@@ -57,7 +53,7 @@ const endpointsApi = app => {
     const userId_invalidateTokens = await req.query.id;
     const INVALIDATE_TOKENS = await req.query.INVALIDATE_TOKENS;
     if (INVALIDATE_TOKENS && userId_invalidateTokens) {
-      const user = await User.findById({_id: userId_invalidateTokens});
+      const user = await User3dartist.findById({_id: userId_invalidateTokens});
       if (!user) {
         return false;
       }
@@ -73,8 +69,8 @@ const endpointsApi = app => {
     const userId_me = await req.query.id;
     const ME = await req.query.ME;
     if (ME && userId_me) {
-      const obtainedUser = await User.findById({_id: userId_me});
-      return res.send({ ...obtainedUser._doc, password: null });
+      const obtainedUser3dartist = await User3dartist.findById({_id: userId_me});
+      return res.send({ ...obtainedUser3dartist._doc, password: null });
     }
     //_________________________________________________//
 
@@ -86,17 +82,17 @@ const endpointsApi = app => {
     const password_login = await req.query.password;
 
     if (LOGIN && (email_login || password_login)) {
-      const user = await User.findOne({ email: email_login});
+      const user = await User3dartist.findOne({ email: email_login});
       if (!user) {
-        return next(new Error('User does not exist!'))
+        return next(new Error('User3dartist does not exist!'))
       }
       const comparePassword = await bcrypt.compare(password_login, user.password);
       if (!comparePassword ) {
         throw new Error('Incorrect password!')
       }
-      const { accessToken, refreshToken } = createTokens(user);
+      const { accessToken3Dartist, refreshToken3Dartist } = createTokens(user);
 
-      return res.send({ userId: user.id, accessToken: accessToken, refreshToken: refreshToken, tokenExpiration: 1 });
+      return res.send({ userId3Dartist: user.id, accessToken3Dartist: accessToken3Dartist, refreshToken3Dartist: refreshToken3Dartist, tokenExpiration3Dartist: 1 });
     }
     //_________________________________________________//
   });
@@ -104,19 +100,19 @@ const endpointsApi = app => {
   app.post('/', async (req, res, next) => {
     // CREATE_USER
     const CREATE_USER = await req.body.CREATE_USER;
-    const email_createUser = await req.body.email;
-    const password_createUser = await req.body.passwordHashed;
+    const email_createUser3dartist = await req.body.email;
+    const password_createUser3dartist = await req.body.passwordHashed;
 
-    if (CREATE_USER && email_createUser && password_createUser) {
-      const existingUser = await User.findOne({email: email_createUser});
-      if (existingUser) {
-        return next(new Error("User already exists!"))
+    if (CREATE_USER && email_createUser3dartist && password_createUser3dartist) {
+      const existingUser3dartist = await User3dartist.findOne({email: email_createUser3dartist});
+      if (existingUser3dartist) {
+        return next(new Error("User3dartist already exists!"))
       }
       
       try {
-        const user = await new User({
-          email: email_createUser,
-          password: password_createUser
+        const user = await new User3dartist({
+          email: email_createUser3dartist,
+          password: password_createUser3dartist
         });
         const result = await user.save()
         return res.send({ ...result._doc, password: null });
@@ -133,7 +129,7 @@ const endpointsApi = app => {
     const scenesArray = await req.body.idArray;
     const UPDATE_CREATED_SCENES = await req.body.UPDATE_CREATED_SCENES;
     if (UPDATE_CREATED_SCENES && userId_updateCreatedScenes && scenesArray) {
-      const user = await User.findById({_id: userId_updateCreatedScenes});
+      const user = await User3dartist.findById({_id: userId_updateCreatedScenes});
       user.createdScenes = scenesArray
       user.save()
       return res.send({ ...user._doc, password: null });

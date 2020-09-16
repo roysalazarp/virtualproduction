@@ -3,31 +3,55 @@ services:
   api-gateway:
     build: './api-gateway'
     depends_on:
-      - users-service
+      - users-3dartist-service
+      - scenes-service
     environment:
-      - USERS_SERVICE_URI=http://users-service:7101
+      - USERS_FILMMAKER_SERVICE_URI=http://users-filmmaker-service:7101
+      - USERS_3DARTIST_SERVICE_URI=http://users-3dartist-service:7103
       - SCENES_SERVICE_URI=http://scenes-service:7102
+      - BOOKINGS_SERVICE_URI=http://bookings-service:7104
+
     ports:
       - "7000:7000"
     volumes:
       - ./api-gateway:/opt/app
 
 
-  users-service:
-    build: './users-service'
+  users-filmmaker-service:
+    build: './users-filmmaker-service'
     ports:
       - "7101:7101"
     volumes:
-      - ./users-service:/opt/app
+      - ./users-filmmaker-service:/opt/app
+
+  users-3dartist-service:
+    build: './users-3dartist-service'
+    ports:
+      - "7103:7103"
+    volumes:
+      - ./users-3dartist-service:/opt/app
 
 
   scenes-service:
     build: './scenes-service'
     depends_on:
-      - users-service
+      - users-3dartist-service
     environment:
-      - USERS_SERVICE_URI=http://users-service:7101
+      - USERS_FILMMAKER_SERVICE_URI=http://users-filmmaker-service:7101
+      - USERS_3DARTIST_SERVICE_URI=http://users-3dartist-service:7103
     ports:
       - "7102:7102"
     volumes:
       - ./scenes-service:/opt/app
+
+  bookings-service:
+    build: './bookings-service'
+    depends_on:
+      - users-filmmaker-service
+    environment:
+      - USERS_FILMMAKER_SERVICE_URI=http://users-filmmaker-service:7101
+      - USERS_3DARTIST_SERVICE_URI=http://users-3dartist-service:7103
+    ports:
+      - "7104:7104"
+    volumes:
+      - ./bookings-service:/opt/app

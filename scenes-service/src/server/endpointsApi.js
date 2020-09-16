@@ -19,6 +19,16 @@ const endpointsApi = app => {
     //_________________________________________________//
 
 
+    // FETCH_SCENE_BY_ID
+    const FETCH_SCENE_BY_ID = await req.query.FETCH_SCENE_BY_ID;
+    const sceneId_fetchSceneById = await req.query.id;
+    if (FETCH_SCENE_BY_ID && sceneId_fetchSceneById) {
+
+      const obtainedScene = await Scene.findOne({ _id: sceneId_fetchSceneById });
+      return res.send(obtainedScene);
+    }
+    //_________________________________________________//
+
 
     // FETCH_SCENES_BY_CREATOR
     const FETCH_SCENES_BY_CREATOR = await req.query.FETCH_SCENES_BY_CREATOR;
